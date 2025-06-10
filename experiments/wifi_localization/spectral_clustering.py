@@ -202,19 +202,27 @@ def main():
     )
     labels = sc.fit_predict(X_scaled)
 
-    # Get spectral embedding
+    # Visualize spectral embedding
     embedding_2d = spectral_embedding(
         sc.affinity_matrix_, n_components=2, random_state=42
     )
 
     plot_to_2d(X_2d=embedding_2d, labels=labels, title="Spectral Embedding")
 
-    # PCA for visualization
-    print("Computing PCA for visualization...")
+    # Visualize clusters on 2D space
     pca = PCA(n_components=2)
     X_pca = pca.fit_transform(X_scaled)
 
     plot_to_2d(X_2d=X_pca, labels=labels, title="Spectral Clustering")
+
+    # Print cluster statistics
+    unique_labels = set(labels)
+    n_clusters = len(unique_labels)
+    print(f"\nFinal Results:")
+    print(f"Number of clusters found: {n_clusters}")
+
+    for k in unique_labels:
+        print(f"Cluster {k}: {list(labels).count(k)} points")
 
     # Internal validity measure
     if n_clusters > 1:
@@ -225,15 +233,6 @@ def main():
     if len(np.unique(y_true)) > 1:
         ari_score = adjusted_rand_score(labels_true=y_true, labels_pred=labels)
         print(f"Adjusted Rand Index: {ari_score:.3f}")
-
-    # Print cluster statistics
-    unique_labels = set(labels)
-    n_clusters = len(unique_labels)
-    print(f"\nFinal Results:")
-    print(f"Number of clusters found: {n_clusters}")
-
-    for k in unique_labels:
-        print(f"Cluster {k}: {list(labels).count(k)} points")
 
 
 if __name__ == "__main__":
