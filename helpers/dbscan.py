@@ -6,18 +6,18 @@ from sklearn.decomposition import PCA
 from sklearn.neighbors import NearestNeighbors
 
 
-def find_optimal_eps(X, min_samples=5):
-    neighbors = NearestNeighbors(n_neighbors=min_samples)
+def find_optimal_eps(X, min_pts=5):
+    neighbors = NearestNeighbors(n_neighbors=min_pts)
     neighbors_fit = neighbors.fit(X)
     distances, indices = neighbors_fit.kneighbors(X)
 
-    # Sort distances to k-th nearest neighbor
-    distances = np.sort(distances[:, min_samples - 1], axis=0)
+    # Get the average distances to other points.
+    avg_distances = distances.mean(axis=1)
 
-    return distances
+    return np.sort(avg_distances, axis=0)
 
 
-def plot_eps_selection(distances, suggested_eps):
+def plot_eps_selection(distances, suggested_eps, min_pts):
     plt.figure(figsize=(10, 6))
     plt.plot(range(len(distances)), distances, "b-")
     plt.axhline(
@@ -27,7 +27,7 @@ def plot_eps_selection(distances, suggested_eps):
         label=f"Suggested eps: {suggested_eps:.3f}",
     )
     plt.xlabel("Points sorted by distance")
-    plt.ylabel(f"{5}-NN Distance")
+    plt.ylabel(f"{min_pts}-NN Distance")
     plt.title("K-Distance Plot for DBSCAN Parameter Selection")
     plt.legend()
     plt.grid(True, alpha=0.3)

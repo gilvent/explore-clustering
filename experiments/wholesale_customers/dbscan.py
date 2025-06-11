@@ -11,7 +11,7 @@ from helpers.dbscan import (
 
 
 def main():
-   # Preprocessing
+    # Preprocessing
     dataset = np.genfromtxt(
         fname="data/wholesale_customers.csv", delimiter=",", dtype=float
     )
@@ -34,26 +34,20 @@ def main():
     X_scaled = scaler.fit_transform(X)
 
     # Find optimal eps using k-distance plot
-    min_samples = 5
-    distances = find_optimal_eps(X_scaled, min_samples)
+    min_pts = X.shape[1]
+    distances = find_optimal_eps(X_scaled, min_pts)
 
     # Suggested eps: 90th percentile of distances
     suggested_eps = np.percentile(distances, 90)
 
-    # Print eps for manual selection
-    for eps in [0.3, 0.5, 0.7, 0.9, 1.1]:
-        dbscan = DBSCAN(eps=eps, min_samples=5)
-        labels = dbscan.fit_predict(X_scaled)
-        n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
-        ari = adjusted_rand_score(y_true, labels)
-        print(f"eps: {eps}, clusters: {n_clusters}, ARI: {ari:.3f}")
-
     # Plot k-distance for parameter selection
-    plot_eps_selection(distances, suggested_eps)
+    plot_eps_selection(
+        distances=distances, suggested_eps=suggested_eps, min_pts=min_pts
+    )
 
     # Apply DBSCAN
     eps = suggested_eps
-    dbscan = DBSCAN(eps=eps, min_samples=min_samples)
+    dbscan = DBSCAN(eps=eps, min_samples=min_pts)
     labels = dbscan.fit_predict(X_scaled)
 
     # Calculate metrics
@@ -62,7 +56,7 @@ def main():
 
     print(f"Estimated number of clusters: {n_clusters}")
     print(f"Estimated number of noise points: {n_noise}")
-    print(f"eps: {eps:.3f}, min_samples: {min_samples}")
+    print(f"eps: {eps:.3f}, min_samples: {min_pts}")
 
     # Internal validity measure: Silhouette score
     if n_clusters > 1:
